@@ -4,13 +4,16 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 
 from api.models import Post
-from utils.error_messages import PASSWORD_NOT_MATCH_ERROR, EMAIL_ALREADY_EXIST
+from utils.constants import PASSWORD_NOT_MATCH_ERROR, EMAIL_ALREADY_EXIST
 from utils.utils import normalize_email, get_random_username
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    serializer for user
+    """
     confirm_password = serializers.CharField(max_length=128, write_only=True, required=True)
 
     class Meta:
@@ -51,6 +54,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class PostSerializer(serializers.ModelSerializer):
+    """
+    serializer for post
+    """
 
     class Meta:
         model = Post

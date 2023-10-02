@@ -4,11 +4,13 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.models import Post
 from api.permissions import IsPostOwner
 from api.serializers import UserSerializer, PostSerializer
+from utils.constants import USER_LOGOUT_SUCCESSFULLY, TOKEN_INVALID, REFRESH_TOKEN_NOT_PROVIDED
 
 User = get_user_model()
 
@@ -61,13 +63,12 @@ class LogoutAPIView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        refresh_token = request.data.get("refresh_token")
+        if not refresh_token:
+            return Response(REFRESH_TOKEN_NOT_PROVIDED, status=status.HTTP_400_BAD_REQUEST)
         try:
-            refresh_token = request.data["refresh"]
-            try:
-                data = RefreshToken(refresh_token)
-                data.blacklist()
-            except Exception:
-                pass
-            return Response(status=status.HTTP_200_OK)
-        except KeyError as e:
-            return Response(f"{e} is required", status=status.HTTP_400_BAD_REQUEST)
+            data = RefreshToken(refresh_token)
+            data.blacklist()
+            return Response(USER_LOGOUT_SUCCESSFULLY, status=status.HTTP_200_OK)
+        except TokenError:
+            return Response(TOKEN_INVALID, status=status.HTTP_400_BAD_REQUEST)

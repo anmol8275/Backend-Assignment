@@ -1,0 +1,5 @@
+PASSWORD_NOT_MATCH_ERROR = "Password and Confirm Password do not match"
+EMAIL_ALREADY_EXIST = "user with this Email Field already exists."
+USER_LOGOUT_SUCCESSFULLY = "User logout successfully"
+REFRESH_TOKEN_NOT_PROVIDED = "Refresh Token not provided"
+TOKEN_INVALID = "Token is invalid or expired"
