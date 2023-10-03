@@ -9,7 +9,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from api.models import Post
 from api.permissions import IsPostOwner
-from api.serializers import UserSerializer, PostSerializer
+from api.serializers import UserSerializer, PostSerializer, UserRegisterSerializer
 from utils.constants import USER_LOGOUT_SUCCESSFULLY, TOKEN_INVALID, REFRESH_TOKEN_NOT_PROVIDED
 
 User = get_user_model()
@@ -19,12 +19,13 @@ class UserViewSet(ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
+    register_serializer = UserRegisterSerializer
 
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action in ["retrieve", "update", "partial_update", "destroy"]:
+        if self.action in ["list", "retrieve", "update", "partial_update", "destroy"]:
             self.permission_classes = (IsAuthenticated,)
         return super().get_permissions()
 
@@ -33,6 +34,14 @@ class UserViewSet(ModelViewSet):
         return: only login user
         """
         return self.queryset.filter(email=self.request.user.email)
+
+    def get_serializer_class(self):
+        """
+        return the serializer based on the action method
+        """
+        if self.action in "create":
+            return self.register_serializer
+        return self.serializer_class
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

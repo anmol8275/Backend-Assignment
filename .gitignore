@@ -11,3 +11,6 @@ ba-venv/
 # JetBrains IDE
 .idea/
 
+media/
+staticfiles/
+

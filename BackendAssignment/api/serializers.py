@@ -14,30 +14,32 @@ class UserSerializer(serializers.ModelSerializer):
     """
     serializer for user
     """
-    confirm_password = serializers.CharField(max_length=128, write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "first_name", "last_name", "password", "confirm_password"]
+        fields = ["id", "username", "email", "first_name", "last_name"]
         extra_kwargs = {
             "username": {"read_only": True},
+            "email": {"read_only": True},
             "first_name": {"required": True},
             "last_name": {"required": True},
-            "password": {"write_only": True},
         }
+
+    def validate_password(self, password):
+        validate_password(password=password)
+        return password
 
     def validate(self, attrs):
         """
         Validation for user registration
         """
         password = attrs.get("password")
-        validate_password(password=password)
         confirm_password = attrs.pop("confirm_password", None)
         if password != confirm_password:
             raise serializers.ValidationError(
                 {"password": [_(PASSWORD_NOT_MATCH_ERROR)]}
             )
-        if User.objects.filter(email=normalize_email(attrs.get("email"))).exists():
+        if attrs.get("email") and User.objects.filter(email=normalize_email(attrs.get("email"))).exists():
             raise serializers.ValidationError({"email": [_(EMAIL_ALREADY_EXIST)]})
         return attrs
 
@@ -51,6 +53,24 @@ class UserSerializer(serializers.ModelSerializer):
             username=random_username, email=email, **validated_data
         )
         return user
+
+
+class UserRegisterSerializer(UserSerializer):
+    confirm_password = serializers.CharField(max_length=128, write_only=True, required=True)
+
+    class Meta(UserSerializer.Meta):
+        model = User
+        fields = UserSerializer.Meta.fields + [
+            "email",
+            "password",
+            "confirm_password"
+        ]
+        extra_kwargs = {
+            "username": {"read_only": True},
+            "password": {"write_only": True},
+            "first_name": {"required": True},
+            "last_name": {"required": True},
+        }
 
 
 class PostSerializer(serializers.ModelSerializer):

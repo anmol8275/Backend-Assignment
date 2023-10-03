@@ -17,6 +17,7 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -29,6 +30,18 @@ urlpatterns = [
     path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path("api/v1/", include("api.urls", namespace="api_urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        # Testing 404 and 500 error pages
+        path("404/", TemplateView.as_view(template_name="404.html"), name="404"),
+        path("500/", TemplateView.as_view(template_name="500.html"), name="500"),
+    ]
+
+    from django.conf.urls.static import static
+
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 if settings.DRF_SPECTACULAR:
     urlpatterns += [
